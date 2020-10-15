@@ -1,3 +1,4 @@
+import os
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -25,15 +26,18 @@ def displayImages(Intensity, AoP, DoLP, HSVinBGR, edges):
         plt.title(subplot_title)
     plt.show()
 
-#replace file names here with the three images you want in your folder
-file_image0 = 'spoon_0.jpg'
-file_image45 = 'spoon_45.jpg'
-file_image90 = 'spoon_90.jpg'
+#put folder name containing the three polarized images of desired object
+folder_name = 'vial5/'
+entries = os.listdir(folder_name)
+object_name = entries[0].split('_')[0]
+file_image0 = os.path.join(folder_name, entries[0])
+file_image45 = os.path.join(folder_name, entries[1])
+file_image90 = os.path.join(folder_name, entries[2])
 
 #reading images in bgr format and converting to grayscale
-image0 = np.int16(cv2.cvtColor(cv2.imread(file_image0),cv2.COLOR_BGR2GRAY))
-image45 = np.int16(cv2.cvtColor(cv2.imread(file_image45),cv2.COLOR_BGR2GRAY))
-image90 = np.int16(cv2.cvtColor(cv2.imread(file_image90),cv2.COLOR_BGR2GRAY))
+image0 = np.int64(cv2.cvtColor(cv2.imread(file_image0),cv2.COLOR_BGR2GRAY))
+image45 = np.int64(cv2.cvtColor(cv2.imread(file_image45),cv2.COLOR_BGR2GRAY))
+image90 = np.int64(cv2.cvtColor(cv2.imread(file_image90),cv2.COLOR_BGR2GRAY))
 
 #calculating stokes parameters
 I = image0 + image90
@@ -50,13 +54,12 @@ V = np.uint8(255*(Intensity/np.amax(Intensity)))
 HSV = cv2.merge((H,S,V))
 new_image = cv2.cvtColor(HSV, cv2.COLOR_HSV2BGR)
 edges = cv2.Canny(new_image, 100, 200)
-edges_image0 = cv2.Canny(np.uint8(image0), 100, 200)
 
 #Extract individual channels
-cv2.imwrite('intensity.jpg', Intensity)
-cv2.imwrite('DoLP.jpg', 255*DoLP)
-cv2.imwrite('AoP.jpg', 255*AoP)
-cv2.imwrite('edges_image0.jpg', edges_image0)
+cv2.imwrite(os.path.join(folder_name, object_name + '_HSVinBGR.jpg'), new_image)
+cv2.imwrite(os.path.join(folder_name, object_name + '_intensity.jpg'), Intensity)
+cv2.imwrite(os.path.join(folder_name, object_name + '_DoLP.jpg'), 255*DoLP)
+cv2.imwrite(os.path.join(folder_name, object_name + '_AoP.jpg'), 255*AoP)
 height, width = new_image.shape[:2]
 cv2.namedWindow('image', cv2.WINDOW_NORMAL)
 cv2.resizeWindow('image', width, height)
